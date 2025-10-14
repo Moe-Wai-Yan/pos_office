@@ -1,1 +1,2 @@
 *.sqlite*
+public/firebase/fcm-server-key.json
