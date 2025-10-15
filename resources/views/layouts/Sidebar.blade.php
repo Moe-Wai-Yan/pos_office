@@ -120,6 +120,34 @@
                     </a>
                 </li>
 
+                 <li class="nav-item">
+                    <a class="nav-link menu-link  {{ Request::routeIs('suppliers*') ? 'active' : '' }}"
+                        href="{{ route('suppliers.index') }}">
+                        <i class="ri-user-3-line"></i><span data-key="t-landing">Suppliers</span>
+                    </a>
+                </li>
+
+                 <li class="nav-item">
+                    <a class="nav-link menu-link  {{ Request::routeIs('tax-rates*') ? 'active' : '' }}"
+                        href="{{ route('tax-rates.index') }}">
+                        <i class="ri-user-3-line"></i><span data-key="t-landing">Tax Rates</span>
+                    </a>
+                </li>
+
+                   <li class="nav-item">
+                    <a class="nav-link menu-link  {{ Request::routeIs('product-attributes*') ? 'active' : '' }}"
+                        href="{{ route('product-attributes.index') }}">
+                        <i class="ri-user-3-line"></i><span data-key="t-landing">Product Attributes</span>
+                    </a>
+                </li>
+
+                 <li class="nav-item">
+                    <a class="nav-link menu-link  {{ Request::routeIs('units*') ? 'active' : '' }}"
+                        href="{{ route('units.index') }}">
+                        <i class="ri-user-3-line"></i><span data-key="t-landing">Units</span>
+                    </a>
+                </li>
+
                 <li class="nav-item">
                     <a class="nav-link menu-link  {{ Request::routeIs('brand*') ? 'active' : '' }}"
                         href="{{ route('brand') }}">
@@ -153,15 +181,15 @@
                         <i class="ri-shape-2-line"></i> <span data-key="t-landing">Sizes</span>
                     </a>
                 </li> --}}
-                <li class="nav-item">
+                {{-- <li class="nav-item">
                     <a class="nav-link menu-link  {{ Request::routeIs('variation*') ? 'active' : '' }}"
                         href="{{ route('variation') }}">
                         <i class="ri-box-2-line"></i> <span data-key="t-landing">Variations</span>
                     </a>
-                </li>
+                </li> --}}
                 <li class="nav-item">
-                    <a class="nav-link menu-link  {{ Request::routeIs('product*') ? 'active' : '' }}"
-                        href="{{ route('product') }}">
+                    <a class="nav-link menu-link  {{ Request::routeIs('products*') ? 'active' : '' }}"
+                        href="{{ route('products.index') }}">
                         <i class="ri-product-hunt-line"></i> <span data-key="t-landing">Products</span>
                     </a>
                 </li>
@@ -174,7 +202,7 @@
                 </li> --}}
 
 
-                 <li class="nav-item">
+                 {{-- <li class="nav-item">
                     <a class="nav-link menu-link  {{ Request::routeIs('banner*') ? 'active' : '' }}"
                         href="{{ route('banner') }}">
                         <i class="ri-slideshow-4-line"></i> <span data-key="t-landing">Banners</span>
@@ -283,7 +311,7 @@
 
                         </ul>
                     </div>
-                </li>
+                </li> --}}
 
 
             </ul>

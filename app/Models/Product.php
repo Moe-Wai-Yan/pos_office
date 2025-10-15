@@ -7,6 +7,7 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Currency;
 use App\Models\ProductImage;
+use Google\Service\AndroidPublisher\Variant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -14,7 +15,7 @@ class Product extends Model
 {
     use HasFactory;
 
-    protected $guarded = [];
+    protected $fillable = ['name','category_id','supplier_id','has_variants','default_expiry_days','description','is_active'];
 
     protected $casts = [
         'sizes' => 'array',
@@ -26,6 +27,10 @@ class Product extends Model
     public function category()
     {
         return $this->belongsTo(Category::class, 'category_id', 'id');
+    }
+
+    public function supplier(){
+        return $this->belongsTo(Supplier::class, 'supplier_id', 'id');
     }
 
 
@@ -46,9 +51,13 @@ class Product extends Model
         return $this->hasMany(VolumePricing::class, 'product_id', 'id');
     }
 
-    public function variations()
+    public function variants()
     {
-        return $this->hasMany(ProductVariation::class, 'product_id', 'id');
+        return $this->hasMany(Variant::class, 'product_id', 'id');
+    }
+
+    public function units(){
+        return $this->belongsTo(Unit::class, 'unit_id', 'id');
     }
 
     public function scopeActive($query)

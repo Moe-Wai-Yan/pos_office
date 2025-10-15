@@ -1,7 +1,5 @@
 <?php
 
-use App\Http\Controllers\Backend\SupplierController;
-use App\Http\Controllers\Backend\UserController;
 use App\Models\ProductColor;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -10,6 +8,8 @@ use App\Http\Controllers\ProductSizeController;
 use App\Http\Controllers\Backend\NoteController;
 use App\Http\Controllers\Backend\PostController;
 use App\Http\Controllers\Backend\RoleController;
+use App\Http\Controllers\Backend\UnitController;
+use App\Http\Controllers\Backend\UserController;
 use App\Http\Controllers\ProductColorController;
 use App\Http\Controllers\Backend\BrandController;
 use App\Http\Controllers\Backend\OrderController;
@@ -17,9 +17,11 @@ use App\Http\Controllers\Backend\BannerController;
 use App\Http\Controllers\Backend\RegionController;
 use App\Http\Controllers\Backend\PaymentController;
 use App\Http\Controllers\Backend\ProductController;
+use App\Http\Controllers\Backend\TaxRateController;
 use App\Http\Controllers\Backend\CategoryController;
 use App\Http\Controllers\Backend\CurrencyController;
 use App\Http\Controllers\Backend\CustomerController;
+use App\Http\Controllers\Backend\SupplierController;
 use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Backend\VariationController;
 use App\Http\Controllers\Backend\WarehouseController;
@@ -30,6 +32,7 @@ use App\Http\Controllers\Backend\SubCategoryController;
 use App\Http\Controllers\OrderSuccessMessageController;
 use App\Http\Controllers\Backend\ContactDetailController;
 use App\Http\Controllers\Backend\VersionSettingController;
+use App\Http\Controllers\Backend\ProductAttributeControler;
 use App\Http\Controllers\Backend\UserWarehousePermissionController;
 
 Route::get('/',function(){
@@ -67,6 +70,18 @@ Route::middleware('auth')->group(function(){
       //Supplier Crud
       Route::resource('suppliers',SupplierController::class);
 
+      //Tax Rate Crud
+      Route::resource('tax-rates',TaxRateController::class);
+
+      //Product Attributes Crud
+      Route::resource('product-attributes',ProductAttributeControler::class);
+
+      //Unit Crud
+      Route::resource('units',UnitController::class);
+
+      //Product Crud
+      Route::resource('products',ProductController::class);
+
 
 
     //profile
@@ -77,50 +92,13 @@ Route::middleware('auth')->group(function(){
     Route::get('/edit-password',[AuthContoller::class,'editPassword'])->name('editPassword');
     Route::post('/edit-password',[AuthContoller::class,'updatePassword'])->name('updatePassword');
 
-    //product colors
-    Route::get('/products/colors',[ProductColorController::class,'index'])->name('product.color');
-    Route::get('/products/colors/datatable/ssd', [ProductColorController::class, 'serverSide']);
 
-    Route::get('/products/colors/create',[ProductColorController::class,'create'])->name('product.color.create');
-    Route::post('/products/colors/create',[ProductColorController::class,'store'])->name('product.color.store');
-    Route::get('/products/colors/edit/{product_color}',[ProductColorController::class,'edit'])->name('product.color.edit');
-    Route::put('/products/colors/edit/{product_color}',[ProductColorController::class,'update'])->name('product.color.update');
-    Route::delete('/products/colors/{product_color}',[ProductColorController::class,'destroy'])->name('product.color.destroy');
 
-    //product sizes
-    Route::get('/products/sizes',[ProductSizeController::class,'index'])->name('product.size');
-    Route::get('/products/sizes/datatable/ssd', [ProductSizeController::class, 'serverSide']);
 
-    Route::get('/products/sizes/create',[ProductSizeController::class,'create'])->name('product.size.create');
-    Route::post('/products/sizes/create',[ProductSizeController::class,'store'])->name('product.size.store');
-    Route::get('/products/sizes/edit/{product_size}',[ProductSizeController::class,'edit'])->name('product.size.edit');
-    Route::put('/products/sizes/edit/{product_size}',[ProductSizeController::class,'update'])->name('product.size.update');
-    Route::delete('/products/sizes/{product_size}',[ProductSizeController::class,'destroy'])->name('product.size.destroy');
 
-    //Product Variation
-    Route::get('/variations', [VariationController::class, 'index'])->name('variation');
-    Route::get('/variations/datatable/ssd', [VariationController::class, 'serverSide']);
 
-    Route::get('/variations/create', [VariationController::class, 'create'])->name('variation.create');
-    Route::post('/variations', [VariationController::class, 'store'])->name('variation.store');
-    Route::get('/variations/{variation}', [VariationController::class, 'detail'])->name('variation.detail');
-    Route::get('/variations/{variation}/edit', [VariationController::class, 'edit'])->name('variation.edit');
-    Route::put('/variations/{variation}/update', [VariationController::class, 'update'])->name('variation.update');
-    Route::delete('/variations/{variation}', [VariationController::class, 'destroy'])->name('variation.destroy');
 
-    Route::post('/variations/{variation}/types', [VariationController::class, 'getTypes']);
-    //Products
-    Route::get('/products', [ProductController::class, 'listing'])->name('product');
-    Route::get('/products/datatable/ssd', [ProductController::class, 'serverSide']);
 
-    Route::get('/products/create', [ProductController::class, 'create'])->name('product.create');
-    Route::post('/products', [ProductController::class, 'store'])->name('product.store');
-    Route::get('/products/{product}', [ProductController::class, 'detail'])->name('product.detail');
-    Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('product.edit');
-    Route::put('/products/{product}/update', [ProductController::class, 'update'])->name('product.update');
-    Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('product.destroy');
-
-    Route::get('product-images/{product}', [ProductController::class, 'images']); // get images from edit
 
     //Wholesales
     Route::get('/wholesales', [WholesaleController::class, 'index'])->name('wholesale');

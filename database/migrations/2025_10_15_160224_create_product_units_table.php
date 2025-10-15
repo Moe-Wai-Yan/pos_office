@@ -13,8 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('volume_pricings', function (Blueprint $table) {
-            $table->integer('option_type_id')->nullable();
+        Schema::create('product_units', function (Blueprint $table) {
+            $table->id();
+            $table->timestamps();
         });
     }
 
@@ -25,8 +26,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('volume_pricings', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('product_units');
     }
 };

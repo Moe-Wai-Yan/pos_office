@@ -2,35 +2,39 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Models\ProductAttribute;
 use Exception;
+use App\Models\Unit;
 use App\Models\Brand;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Supplier;
+use App\Models\Variation;
 use App\Models\ProductSize;
 use App\Models\ProductColor;
 use App\Models\ProductImage;
 use Illuminate\Http\Request;
+use App\Models\VariationType;
+use App\Models\VolumePricing;
+use App\Models\ProductVariation;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
-use App\Models\ProductVariation;
-use App\Models\Variation;
-use App\Models\VariationType;
-use App\Models\VolumePricing;
 
 class ProductController extends Controller
 {
-    // public $productImageArray = [];
-    /**
-     * product listing view
-     *
-     * @return void
-     */
-    public function listing()
+
+      public function index()
     {
-        return view('backend.products.index');
+        $products = Product::with(['category', 'supplier'])->latest()->get();
+        $categories = Category::pluck('name', 'id');
+        $suppliers = Supplier::pluck('name', 'id');
+        $attributes = ProductAttribute::all();
+        $units=Unit::all();
+
+        return view('backend.products.index', compact('products', 'categories', 'suppliers','units','attributes'));
     }
 
     /**
@@ -54,84 +58,51 @@ class ProductController extends Controller
      * @param Request $request
      * @return void
      */
-    public function store(StoreProductRequest $request)
-    {
-        // dd($request->all());
-        DB::beginTransaction();
-        try {
-            $product = new Product();
-            $product->name = $request->name;
-            $product->category_id = $request->category_id ?? null;
-            $product->brand_id = $request->brand_id ?? null;
-            $product->sub_category_id = $request->sub_category_id ?? null;
-            $product->discount_price=$request->discount_price ?? null;
-            $product->description = $request->description ?? null;
-            // $product->english_colors = $request->english_colors ?? [];
+    public function store(Request $request)
+{
+    dd($request->all());
+    $data = $request->validate([
+        'name' => 'required|string|max:255',
+        'category_id' => 'required',
+        'supplier_id' => 'required',
+        'has_variants' => 'boolean',
+        'description' => 'nullable|string',
+        'default_expiry_days' => 'nullable|integer',
+    ]);
 
-            // if($request->english_colors){
-            //     foreach($request->english_colors as $en_color){
-            //         $myanmar_colors[] = ProductColor::select('myanmar_name')->where('english_name',$en_color)->get()->value('myanmar_name');
-            //     }
-            // }
-            // $product->myanmar_colors = $myanmar_colors ?? [];
-            // $product->sizes = $request->sizes ?? [];
-             if($request->is_new_arrival) {
-                $product->is_new_arrival = 1;
-            } else {
-                $product->is_new_arrival = 0;
+    $product = Product::create($data);
+
+    if ($request->has_variants) {
+        foreach ($request->variants ?? [] as $variantData) {
+            $variant = $product->variants()->create([
+                'sku' => $variantData['sku'],
+                'barcode' => $variantData['barcode'] ?? null,
+                'default_cost' => $variantData['default_cost'] ?? null,
+                'default_price' => $variantData['default_price'] ?? null,
+                'is_active' => true,
+            ]);
+
+            if (!empty($variantData['attribute_id']) && !empty($variantData['value'])) {
+
+                $variant->variantAttributes()->create([
+                    'attribute_id' => $variantData['attribute_id'],
+                    'value' => $variantData['value'],
+                ]);
+
             }
-            $product->product_type = $request->product_type;
-            $product->save();
+        }
+    } else {
+        foreach ($request->units ?? [] as $u) {
+            $product->units()->create($u);
+        }
 
-            // dd($request->all());
-            $option_ids = [];
-            $stocks = [];
-            $prices = [];
-            if ($request->product_type == "1") {
-                 $product->price = $request->price;
-                $product->stock = $request->stock;
-                $product->update();
-            } else {
-                $option_ids = [];
-                $prices = [];
-                $stocks = [];
-                $discounts=[];
-
-                 if ($request->prices) {
-                    foreach ($request->prices as $uniqueKey => $price) {
-                        $option_ids[$uniqueKey] = $request->option_variation_ids[$uniqueKey] ?? null;
-                        $stocks[$uniqueKey] = $request->stocks[$uniqueKey] ?? null;
-                        $prices[$uniqueKey] = $price;
-                        $discounts[$uniqueKey] = $request->discounts[$uniqueKey] ?? null;
-                    }
-                }
-
-                foreach ($request->colors as $uniqueKey => $colorArray) {
-                    // dd($uniqueKey,$colorArray);
-                    $variation = new ProductVariation();
-                    $variation->product_id = $product->id;
-                    $variation->variation_id = $request->variations[$uniqueKey] ?? null;
-                    $variation->variation_type_id = $request->types[$uniqueKey] ?? null;
-                    $variation->color = $colorArray[0] ?? null;
-                    $variation->option_type_ids = isset($option_ids[$uniqueKey]) ? json_encode($option_ids[$uniqueKey]) : null;
-                    $variation->price = isset($prices[$uniqueKey]) ? json_encode($prices[$uniqueKey]) : null;
-                    $variation->stock = isset($stocks[$uniqueKey]) ? json_encode($stocks[$uniqueKey]) : null;
-                    $variation->discount_price=isset($discounts[$uniqueKey]) ? json_encode($discounts[$uniqueKey]) : null;
-                    $variation->save();
-                }
-            }
-
-            if ($request->hasFile('images')) {
-                $this->_createProductImages($product->id, $request->file('images'));
-            }
-
-            DB::commit();
-            return redirect()->route('product')->with('created', 'Product Created Successfully');
-        } catch (Exception $e) {
-            DB::rollBack();
-            throw $e;
+        foreach ($request->prices ?? [] as $p) {
+            $product->prices()->create($p);
         }
     }
+
+    return back()->with('success', 'Product created successfully!');
+}
 
     /**
      * Product detail

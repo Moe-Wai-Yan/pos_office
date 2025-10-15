@@ -26,36 +26,36 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('s5gefzuFZ3JyUw=='),
         ]);
 
-        $sizes = [
-            ['name' => 'xl'],
-            ['name' => 'l'],
-            ['name' => 'm'],
-            ['name' => 'sm'],
-            ['name' => 'xxl'],
-        ];
+        // $sizes = [
+        //     ['name' => 'xl'],
+        //     ['name' => 'l'],
+        //     ['name' => 'm'],
+        //     ['name' => 'sm'],
+        //     ['name' => 'xxl'],
+        // ];
 
-        $colors = [
-            [
-                'english_name' => 'Red',
-                'myanmar_name' => 'အနီ',
-            ],
-            [
-                'english_name' => 'White',
-                'myanmar_name' => 'အဖြူ',
-            ],
-            [
-                'english_name' => 'Black',
-                'myanmar_name' => 'အနက်',
-            ],
-            [
-                'english_name' => 'Blue',
-                'myanmar_name' => 'အပြာ',
-            ],
-        ];
+        // $colors = [
+        //     [
+        //         'english_name' => 'Red',
+        //         'myanmar_name' => 'အနီ',
+        //     ],
+        //     [
+        //         'english_name' => 'White',
+        //         'myanmar_name' => 'အဖြူ',
+        //     ],
+        //     [
+        //         'english_name' => 'Black',
+        //         'myanmar_name' => 'အနက်',
+        //     ],
+        //     [
+        //         'english_name' => 'Blue',
+        //         'myanmar_name' => 'အပြာ',
+        //     ],
+        // ];
 
-        ProductSize::insert($sizes);
+        // ProductSize::insert($sizes);
 
-        ProductColor::insert($colors);
-        $this->call(VersionSeeder::class);
+        // ProductColor::insert($colors);
+        // $this->call(VersionSeeder::class);
     }
 }

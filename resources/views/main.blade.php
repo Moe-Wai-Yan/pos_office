@@ -32,6 +32,7 @@
         <link href="https://cdn.bootcss.com/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
 
 
+
         <!-- Layout config Js -->
         <script src="{{asset('assets/js/layout.js')}}"></script>
         <!-- Bootstrap Css -->
