@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\PurchaseStatusEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -18,7 +19,7 @@ return new class extends Migration
             $table->unsignedBigInteger('supplier_id');
             $table->unsignedBigInteger('to_location_id');
             $table->string('po_number');
-            $table->string('status');
+            $table->enum('status',PurchaseStatusEnum::options());
             $table->string('payment_status');
             $table->decimal('paid_amount');
             $table->decimal('due_amount');

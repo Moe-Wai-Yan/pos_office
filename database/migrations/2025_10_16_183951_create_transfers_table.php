@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\TransferStatusEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -18,7 +19,7 @@ return new class extends Migration
             $table->unsignedBigInteger('from_location_id');
             $table->unsignedBigInteger('to_location_id');
             $table->unsignedBigInteger('user_id');
-            $table->string('status');
+            $table->enum('status',TransferStatusEnum::options());
             $table->timestamps();
         });
     }
