@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      *
@@ -12,12 +13,13 @@ return new class extends Migration {
      */
     public function up()
     {
-        Schema::create('product_units', function (Blueprint $table) {
+        Schema::create('loyalty_transactions', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('variant_id');
-            $table->unsignedBigInteger('unit_id');
-            $table->decimal('sell_price', 15, 4)->nullable();
-            $table->boolean('is_default')->default(false);
+            $table->unsignedBigInteger('loyalty_id');
+            $table->integer('change_points');
+            $table->string('reason');
+            $table->string('ref_type');
+            $table->integer('ref_id');
             $table->timestamps();
         });
     }
@@ -29,6 +31,6 @@ return new class extends Migration {
      */
     public function down()
     {
-        Schema::dropIfExists('product_units');
+        Schema::dropIfExists('loyalty_transactions');
     }
 };

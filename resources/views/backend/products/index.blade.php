@@ -1,68 +1,73 @@
-@extends('main')
+@extends('layouts.app')
 
 @section('content')
 <div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="fw-bold">Products</h4>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
-      <i class="bi bi-plus-lg me-1"></i> Add Product
-    </button>
-  </div>
-
-  <div class="card">
-    <div class="card-body table-responsive">
-      <table class="table table-hover align-middle">
-        <thead class="table-light">
-          <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Category</th>
-            <th>Supplier</th>
-            <th>Variants?</th>
-            <th>Status</th>
-            <th class="text-end">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          @foreach ($products as $product)
-          <tr>
-            <td>{{ $loop->iteration }}</td>
-            <td>{{ $product->name }}</td>
-            <td>{{ $product->category->name ?? '-' }}</td>
-            <td>{{ $product->supplier->name ?? '-' }}</td>
-            <td>
-              @if ($product->has_variants)
-                <span class="badge bg-info">Yes</span>
-              @else
-                <span class="badge bg-secondary">No</span>
-              @endif
-            </td>
-            <td>
-              @if ($product->is_active)
-                <span class="badge bg-success">Active</span>
-              @else
-                <span class="badge bg-danger">Inactive</span>
-              @endif
-            </td>
-            <td class="text-end">
-              <a href="{{ route('products.show', $product->id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
-              <a href="{{ route('products.edit', $product->id) }}" class="btn btn-sm btn-outline-success"><i class="bi bi-pencil"></i></a>
-              <form action="{{ route('products.destroy', $product->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this product?')">
-                @csrf @method('DELETE')
-                <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
-              </form>
-            </td>
-          </tr>
-          @endforeach
-        </tbody>
-      </table>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-bold">Products</h4>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
+            <i class="bi bi-plus-lg"></i> Add Product
+        </button>
     </div>
-  </div>
+
+    {{-- Alerts --}}
+    @if (session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+
+    {{-- Products Table --}}
+    <div class="card shadow-sm">
+        <div class="card-body table-responsive">
+            <table class="table table-striped align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Supplier</th>
+                        <th>Has Variants</th>
+                        <th>Active</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($products as $key => $product)
+                        <tr>
+                            <td>{{ $key+1 }}</td>
+                            <td>{{ $product->name }}</td>
+                            <td>{{ $product->category->name ?? '-' }}</td>
+                            <td>{{ $product->supplier->name ?? '-' }}</td>
+                            <td>
+                                <span class="badge {{ $product->has_variants ? 'bg-success' : 'bg-secondary' }}">
+                                    {{ $product->has_variants ? 'Yes' : 'No' }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input toggle-active" type="checkbox"
+                                        data-id="{{ $product->id }}" {{ $product->is_active ? 'checked' : '' }}>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary"
+                                    onclick="editProduct({{ $product }})">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger"
+                                    onclick="deleteProduct({{ $product->id }})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="7" class="text-center text-muted">No products found</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
- {{-- Product Form --}}
-
- <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl">
     <form id="productForm" action="{{ route('products.store') }}" method="POST" class="modal-content">
       @csrf
@@ -72,18 +77,18 @@
       </div>
 
       <div class="modal-body">
-        {{-- Product Info --}}
+        {{-- BASIC PRODUCT INFO --}}
         <div class="row g-3">
           <div class="col-md-6">
             <label class="form-label fw-bold">Product Name</label>
-            <input type="text" name="name" class="form-control" required>
+            <input type="text" name="name" id="name" class="form-control" required>
           </div>
 
           <div class="col-md-3">
             <label class="form-label fw-bold">Category</label>
-            <select name="category_id" class="form-select" required>
+            <select name="category_id" id="category_id" class="form-select" required>
               <option value="">Select Category</option>
-              @foreach($categories as $id => $name)
+              @foreach ($categories as $id => $name)
                 <option value="{{ $id }}">{{ $name }}</option>
               @endforeach
             </select>
@@ -91,9 +96,9 @@
 
           <div class="col-md-3">
             <label class="form-label fw-bold">Supplier</label>
-            <select name="supplier_id" class="form-select" required>
+            <select name="supplier_id" id="supplier_id" class="form-select" required>
               <option value="">Select Supplier</option>
-              @foreach($suppliers as $id => $name)
+              @foreach ($suppliers as $id => $name)
                 <option value="{{ $id }}">{{ $name }}</option>
               @endforeach
             </select>
@@ -101,7 +106,7 @@
 
           <div class="col-md-3">
             <label class="form-label fw-bold">Default Expiry (days)</label>
-            <input type="number" name="default_expiry_days" class="form-control">
+            <input type="number" name="default_expiry_days" id="default_expiry_days" class="form-control">
           </div>
 
           <div class="col-md-3 d-flex align-items-center mt-4">
@@ -113,30 +118,28 @@
 
           <div class="col-12">
             <label class="form-label fw-bold">Description</label>
-            <textarea name="description" rows="2" class="form-control"></textarea>
+            <textarea name="description" id="description" rows="2" class="form-control"></textarea>
           </div>
         </div>
 
-        <hr>
-
-        {{-- Variant Section --}}
-        <div id="variantsSection" class="d-none">
+        {{-- VARIANTS SECTION --}}
+        <div id="variantsSection" class="mt-4 d-none">
           <div class="d-flex justify-content-between align-items-center mb-2">
             <h6 class="fw-bold mb-0">Variants</h6>
             <button type="button" class="btn btn-sm btn-outline-success" id="addVariantRow">
-              <i class="bi bi-plus"></i> Add Variant
+              <i class="bi bi-plus-lg"></i> Add Variant
             </button>
           </div>
           <div class="table-responsive">
-            <table class="table table-bordered">
+            <table class="table table-bordered align-middle">
               <thead class="table-light">
                 <tr>
                   <th>SKU</th>
                   <th>Barcode</th>
+                  <th>Size</th>
+                  <th>Color</th>
                   <th>Cost</th>
                   <th>Price</th>
-                  <th>Attribute</th>
-                  <th>Value</th>
                   <th></th>
                 </tr>
               </thead>
@@ -145,116 +148,216 @@
           </div>
         </div>
 
-        {{-- Units + Prices (only for non-variant products) --}}
-        <div id="unitPriceSection">
-          <h6 class="fw-bold mt-3">Units</h6>
-          <table class="table table-bordered">
-            <thead class="table-light"><tr><th>Unit</th><th>Sell Price</th><th>Default?</th><th></th></tr></thead>
-            <tbody id="unitRows"></tbody>
-          </table>
-          <button type="button" id="addUnit" class="btn btn-sm btn-outline-primary"><i class="bi bi-plus"></i> Add Unit</button>
-
-          <hr>
-          <h6 class="fw-bold">Prices</h6>
-          <table class="table table-bordered">
-            <thead class="table-light"><tr><th>Name</th><th>Currency</th><th>Price</th><th>From</th><th>To</th><th></th></tr></thead>
-            <tbody id="priceRows"></tbody>
-          </table>
-          <button type="button" id="addPrice" class="btn btn-sm btn-outline-warning"><i class="bi bi-plus"></i> Add Price</button>
+        {{-- UNITS SECTION --}}
+        <div class="mt-4">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="fw-bold mb-0">Units</h6>
+            <button type="button" class="btn btn-sm btn-outline-success" id="addUnitRow">
+              <i class="bi bi-plus-lg"></i> Add Unit
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Unit</th>
+                  <th>Sell Price</th>
+                  <th>Default</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="unitRows"></tbody>
+            </table>
+          </div>
         </div>
+
+        {{-- PRICES SECTION --}}
+        <div class="mt-4">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="fw-bold mb-0">Price Lists</h6>
+            <button type="button" class="btn btn-sm btn-outline-success" id="addPriceRow">
+              <i class="bi bi-plus-lg"></i> Add Price
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Price Name</th>
+                  <th>Currency</th>
+                  <th>Price</th>
+                  <th>Effective From</th>
+                  <th>Effective To</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="priceRows"></tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
 
       <div class="modal-footer">
-        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="submit" class="btn btn-primary">Save Product</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
       </div>
     </form>
   </div>
 </div>
 
-@section('script')
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const hasVariants = document.getElementById('has_variants');
-  const variantsSection = document.getElementById('variantsSection');
-  const unitPriceSection = document.getElementById('unitPriceSection');
-  const variantRows = document.getElementById('variantRows');
-  const addVariantRow = document.getElementById('addVariantRow');
-  const unitRows = document.getElementById('unitRows');
-  const priceRows = document.getElementById('priceRows');
-  const addUnit = document.getElementById('addUnit');
-  const addPrice = document.getElementById('addPrice');
+{{-- TEMPLATES --}}
+<template id="variantRowTemplate">
+  <tr>
+    <td><input type="text" name="variants[__index__][sku]" class="form-control" required></td>
+    <td><input type="text" name="variants[__index__][barcode]" class="form-control"></td>
+    <td><input type="text" name="variants[__index__][size]" class="form-control"></td>
+    <td><input type="text" name="variants[__index__][color]" class="form-control"></td>
+    <td><input type="number" step="0.01" name="variants[__index__][cost]" class="form-control"></td>
+    <td><input type="number" step="0.01" name="variants[__index__][price]" class="form-control"></td>
+    <td class="text-center">
+      <button type="button" class="btn btn-sm btn-outline-danger remove-variant"><i class="bi bi-x-lg"></i></button>
+    </td>
+  </tr>
+</template>
 
-  let v = 0, u = 0, p = 0;
+<template id="unitRowTemplate">
+  <tr>
+    <td>
+      <select name="units[__index__][unit_id]" class="form-select" required>
+        <option value="">Select Unit</option>
+        @foreach ($units as $id => $code)
+          <option value="{{ $id }}">{{ $code }}</option>
+        @endforeach
+      </select>
+    </td>
+    <td><input type="number" step="0.01" name="units[__index__][sell_price]" class="form-control" required></td>
+    <td class="text-center">
+      <input type="checkbox" name="units[__index__][is_default]" value="1" class="form-check-input">
+    </td>
+    <td class="text-center">
+      <button type="button" class="btn btn-sm btn-outline-danger remove-unit"><i class="bi bi-x-lg"></i></button>
+    </td>
+  </tr>
+</template>
 
-  hasVariants.addEventListener('change', () => {
-    const checked = hasVariants.checked;
-    variantsSection.classList.toggle('d-none', !checked);
-    unitPriceSection.classList.toggle('d-none', checked);
-  });
+<template id="priceRowTemplate">
+  <tr>
+    <td><input type="text" name="prices[__index__][price_name]" class="form-control" required></td>
+    <td><input type="text" name="prices[__index__][currency]" value="USD" class="form-control" required></td>
+    <td><input type="number" step="0.01" name="prices[__index__][price]" class="form-control" required></td>
+    <td><input type="date" name="prices[__index__][effective_from]" class="form-control"></td>
+    <td><input type="date" name="prices[__index__][effective_to]" class="form-control"></td>
+    <td class="text-center">
+      <button type="button" class="btn btn-sm btn-outline-danger remove-price"><i class="bi bi-x-lg"></i></button>
+    </td>
+  </tr>
+</template>
 
-  addVariantRow.addEventListener('click', () => {
-    variantRows.insertAdjacentHTML('beforeend', `
-      <tr>
-        <td><input name="variants[${v}][sku]" class="form-control"></td>
-        <td><input name="variants[${v}][barcode]" class="form-control"></td>
-        <td><input name="variants[${v}][default_cost]" type="number" step="0.01" class="form-control"></td>
-        <td><input name="variants[${v}][default_price]" type="number" step="0.01" class="form-control"></td>
-        <td>
-          <select name="variants[${v}][attribute_id]" class="form-select">
-            <option value="">Select Attribute</option>
-            @foreach($attributes as $attr)
-              <option value="{{ $attr->id }}">{{ $attr->name }}</option>
-            @endforeach
-          </select>
-        </td>
-        <td><input name="variants[${v}][value]" class="form-control"></td>
-        <td><button type="button" class="btn btn-sm btn-danger remove-row">X</button></td>
-      </tr>
-    `);
-    v++;
-  });
 
-  addUnit.addEventListener('click', () => {
-    unitRows.insertAdjacentHTML('beforeend', `
-      <tr>
-        <td>
-          <select name="units[${u}][unit_id]" class="form-select">
-            @foreach($units as $unit)
-              <option value="{{ $unit->id }}">{{ $unit->name }}</option>
-            @endforeach
-          </select>
-        </td>
-        <td><input name="units[${u}][sell_price]" type="number" step="0.01" class="form-control"></td>
-        <td><input name="units[${u}][is_default]" type="checkbox" value="1"></td>
-        <td><button type="button" class="btn btn-sm btn-danger remove-row">X</button></td>
-      </tr>
-    `);
-    u++;
-  });
 
-  addPrice.addEventListener('click', () => {
-    priceRows.insertAdjacentHTML('beforeend', `
-      <tr>
-        <td><input name="prices[${p}][price_name]" class="form-control"></td>
-        <td><input name="prices[${p}][currency]" class="form-control" value="USD"></td>
-        <td><input name="prices[${p}][price]" type="number" step="0.01" class="form-control"></td>
-        <td><input name="prices[${p}][effective_from]" type="date" class="form-control"></td>
-        <td><input name="prices[${p}][effective_to]" type="date" class="form-control"></td>
-        <td><button type="button" class="btn btn-sm btn-danger remove-row">X</button></td>
-      </tr>
-    `);
-    p++;
-  });
 
-  document.body.addEventListener('click', e => {
-    if (e.target.classList.contains('remove-row')) e.target.closest('tr').remove();
-  });
-});
-</script>
+{{-- Variant Row Template --}}
+<template id="variantRowTemplate">
+  <tr>
+    <td><input type="text" name="variants[__index__][sku]" class="form-control" required></td>
+    <td><input type="text" name="variants[__index__][barcode]" class="form-control"></td>
+    <td><input type="text" name="variants[__index__][size]" class="form-control"></td>
+    <td><input type="text" name="variants[__index__][color]" class="form-control"></td>
+    <td><input type="number" step="0.01" name="variants[__index__][cost]" class="form-control"></td>
+    <td><input type="number" step="0.01" name="variants[__index__][price]" class="form-control"></td>
+    <td class="text-center">
+      <button type="button" class="btn btn-sm btn-outline-danger remove-variant">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </td>
+  </tr>
+</template>
+
+
+
+
 @endsection
 
+@section('script')
+<script>
+    function editProduct(product) {
+        $('#productModalLabel').text('Edit Product');
+        $('#productForm').attr('action', '/products/' + product.id);
+        $('#productForm').append('<input type="hidden" name="_method" value="PUT">');
+        $('#name').val(product.name);
+        $('#category_id').val(product.category_id);
+        $('#supplier_id').val(product.supplier_id);
+        $('#has_variants').prop('checked', product.has_variants);
+        $('#default_expiry_days').val(product.default_expiry_days);
+        $('#description').val(product.description);
+        $('#productModal').modal('show');
+    }
 
-{{-- End Product Form --}}
+    function deleteProduct(id) {
+        if (confirm('Are you sure you want to delete this product?')) {
+            fetch(`/products/${id}`, {
+                method: 'DELETE',
+                headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
+            }).then(res => location.reload());
+        }
+    }
 
 
+  document.addEventListener('DOMContentLoaded', () => {
+    const hasVariants = document.getElementById('has_variants');
+    const variantsSection = document.getElementById('variantsSection');
+    const variantRows = document.getElementById('variantRows');
+    const addVariantBtn = document.getElementById('addVariantRow');
+    const rowTemplate = document.getElementById('variantRowTemplate').innerHTML;
+    let index = 0;
+
+    // Toggle variant section
+    hasVariants.addEventListener('change', () => {
+      variantsSection.classList.toggle('d-none', !hasVariants.checked);
+    });
+
+    // Add variant row
+    addVariantBtn.addEventListener('click', () => {
+      const newRow = rowTemplate.replace(/__index__/g, index++);
+      variantRows.insertAdjacentHTML('beforeend', newRow);
+    });
+
+    // Remove variant row
+    variantRows.addEventListener('click', (e) => {
+      if (e.target.closest('.remove-variant')) {
+        e.target.closest('tr').remove();
+      }
+    });
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+  const toggleSection = (checkbox, sectionId) => {
+    document.getElementById(sectionId).classList.toggle('d-none', !checkbox.checked);
+  };
+
+  const dynamicTable = (btnId, rowId, templateId, removeClass) => {
+    const tableBody = document.getElementById(rowId);
+    const template = document.getElementById(templateId).innerHTML;
+    let i = 0;
+    document.getElementById(btnId).addEventListener('click', () => {
+      const newRow = template.replace(/__index__/g, i++);
+      tableBody.insertAdjacentHTML('beforeend', newRow);
+    });
+    tableBody.addEventListener('click', e => {
+      if (e.target.closest(removeClass)) e.target.closest('tr').remove();
+    });
+  };
+
+  // toggle variant section
+  const hasVariants = document.getElementById('has_variants');
+  hasVariants.addEventListener('change', () => toggleSection(hasVariants, 'variantsSection'));
+
+  // dynamic rows
+  dynamicTable('addVariantRow', 'variantRows', 'variantRowTemplate', '.remove-variant');
+  dynamicTable('addUnitRow', 'unitRows', 'unitRowTemplate', '.remove-unit');
+  dynamicTable('addPriceRow', 'priceRows', 'priceRowTemplate', '.remove-price');
+});
+
+</script>
 @endsection

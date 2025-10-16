@@ -15,7 +15,7 @@ class Product extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name','category_id','supplier_id','has_variants','default_expiry_days','description','is_active'];
+    protected $fillable = ['name', 'category_id', 'supplier_id', 'has_variants', 'default_expiry_days', 'description', 'is_active'];
 
     protected $casts = [
         'sizes' => 'array',
@@ -29,7 +29,8 @@ class Product extends Model
         return $this->belongsTo(Category::class, 'category_id', 'id');
     }
 
-    public function supplier(){
+    public function supplier()
+    {
         return $this->belongsTo(Supplier::class, 'supplier_id', 'id');
     }
 
@@ -53,10 +54,18 @@ class Product extends Model
 
     public function variants()
     {
-        return $this->hasMany(Variant::class, 'product_id', 'id');
+        return $this->hasMany(ProductVariant::class, 'product_id', 'product_id');
     }
 
-    public function units(){
+
+    public function defaultVariant()
+    {
+        return $this->hasOne(ProductVariant::class, 'product_id', 'product_id')->where('is_default', true);
+    }
+
+
+    public function units()
+    {
         return $this->belongsTo(Unit::class, 'unit_id', 'id');
     }
 

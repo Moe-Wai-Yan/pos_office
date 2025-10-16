@@ -12,12 +12,12 @@
                         </div>
                     </div>
                     <div class="d-flex align-items-end justify-content-between mt-4">
-                        <div>
+                        {{-- <div>
                             <h4 class="fs-22 fw-bold ff-secondary text-dark mb-4">
                                 {{ App\Models\Order::count() }}
                             </h4>
                             <a href="{{ route('order') }}" class="text-decoration-underline text-dark-50">View orders</a>
-                        </div>
+                        </div> --}}
                         <div class="avatar-sm flex-shrink-0">
                             <span class="avatar-title rounded fs-3 bg-dark">
                                 <i class="bx bx-shopping-bag"></i>
@@ -37,12 +37,12 @@
                         </div>
                     </div>
                     <div class="d-flex align-items-end justify-content-between mt-4">
-                        <div>
+                        {{-- <div>
                             <h4 class="fs-22 fw-bold ff-secondary text-dark  mb-4">
                                 {{ App\Models\Order::where('status','pending')->count() }}
                             </h4>
                             <a href="{{route('orderByStatus','pending')}}" class="text-decoration-underline text-dark-50">View orders</a>
-                        </div>
+                        </div> --}}
                         <div class="avatar-sm flex-shrink-0">
                             <span class="avatar-title rounded fs-3 bg-dark">
                                 <i class="bx bx-shopping-bag"></i>
@@ -61,7 +61,7 @@
                                 Total Products </p>
                         </div>
                     </div>
-                    <div class="d-flex align-items-end justify-content-between mt-4">
+                    {{-- <div class="d-flex align-items-end justify-content-between mt-4">
                         <div>
                             <h4 class="fs-22 fw-bold ff-secondary text-dark mb-4">
                                 {{ App\Models\Product::where('status','1')->count() }}
@@ -73,7 +73,7 @@
                                 <i class="ri-product-hunt-fill"></i>
                             </span>
                         </div>
-                    </div>
+                    </div> --}}
                 </div><!-- end card body -->
             </div>
         </div>
@@ -86,7 +86,7 @@
                                 Total Customers</p>
                         </div>
                     </div>
-                    <div class="d-flex align-items-end justify-content-between mt-4">
+                    {{-- <div class="d-flex align-items-end justify-content-between mt-4">
                         <div>
                             <h4 class="fs-22 fw-bold ff-secondary text-dark mb-4">
                                 {{ App\Models\Customer::count() }}
@@ -98,7 +98,7 @@
                                 <i class="ri-user-3-fill"></i>
                             </span>
                         </div>
-                    </div>
+                    </div> --}}
                 </div><!-- end card body -->
             </div>
         </div>
@@ -121,7 +121,7 @@
                             <th class="text-center">နာမည်</th>
                             <th class="text-center">Total Orders</th>
                         </thead>
-                        <tbody>
+                        {{-- <tbody>
                             @if ($topProducts->count() == 0)
                                 <tr class="text-center">
                                     <td colspan="3" class="text-secondary">No data available in table</td>
@@ -137,7 +137,7 @@
                                 </tr>
                                 @endforeach
                             @endif
-                        </tbody>
+                        </tbody> --}}
                     </table>
                 </div>
             </div>
@@ -159,7 +159,7 @@
                             <th class="text-center">Email or Phone</th>
                             <th class="text-center">Total Amount</th>
                         </thead>
-                        <tbody>
+                        {{-- <tbody>
                             @if ($topCustomers->count() == 0)
                                 <tr class="text-center">
                                     <td colspan="3" class="text-secondary">No data available in table</td>
@@ -173,7 +173,7 @@
                                 </tr>
                                 @endforeach
                             @endif
-                        </tbody>
+                        </tbody> --}}
                     </table>
                 </div>
             </div>
